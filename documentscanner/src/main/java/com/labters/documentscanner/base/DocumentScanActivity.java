@@ -103,7 +103,7 @@ public abstract class DocumentScanActivity extends AppCompatActivity {
     }
 
 
-    private void initializeCropping() {
+    public void initializeCropping() {
         Bitmap scaledBitmap = scaledBitmap(selectedImage, getHolderImageCrop().getWidth(), getHolderImageCrop().getHeight());
         getImageView().setImageBitmap(scaledBitmap);
 
@@ -127,7 +127,7 @@ public abstract class DocumentScanActivity extends AppCompatActivity {
         }
     }
 
-    protected Bitmap getCroppedImage() {
+    protected Bitmap getCroppedImage(Bitmap currentImage) {
         try {
             Map<Integer, PointF> points = getPolygonView().getPoints();
 
@@ -142,7 +142,7 @@ public abstract class DocumentScanActivity extends AppCompatActivity {
             float y2 = (Objects.requireNonNull(points.get(1)).y) * yRatio;
             float y3 = (Objects.requireNonNull(points.get(2)).y) * yRatio;
             float y4 = (Objects.requireNonNull(points.get(3)).y) * yRatio;
-            return nativeClass.getScannedBitmap(selectedImage, x1, y1, x2, y2, x3, y3, x4, y4);
+            return nativeClass.getScannedBitmap(currentImage, x1, y1, x2, y2, x3, y3, x4, y4);
         } catch (Exception e) {
             showError(CropperErrorType.CROP_ERROR);
             return null;

@@ -14,76 +14,35 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         tools:context="com.labters.documentscanner.ImageCropActivity"
-        android:background="#ffffff"
-        android:id="@+id/rlContainer"
->
+        android:background="#000000"
+        android:id="@+id/rlContainer">
+
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             tools:context="com.labters.documentscanner.ImageCropActivity"
-            android:background="#ffffff"
+            android:background="#000000"
             android:orientation="vertical"
             android:weightSum="10">
-        <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp">
-            <ImageView
-                    android:id="@+id/ivRotate"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:padding="5dp"
-                    android:layout_marginEnd="8dp"
-                    android:layout_marginTop="8dp"
-                    android:src="@drawable/ic_rotate"
-                    android:foreground="?android:selectableItemBackground"
-                    android:layout_alignParentEnd="true"
-                    android:layout_centerVertical="true"
-            />
-            <ImageView
-                    android:id="@+id/ivRebase"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:padding="5dp"
-                    android:src="@drawable/ic_align"
-                    android:foreground="?android:selectableItemBackground"
-                    android:layout_centerInParent="true"
-                    android:layout_centerVertical="true"
-            />
-            <ImageView
-                    android:id="@+id/ivInvert"
-                    android:layout_width="40dp"
-                    android:layout_height="40dp"
-                    android:padding="5dp"
-                    android:src="@drawable/ic_invert_colors"
-                    android:foreground="?android:selectableItemBackground"
-                    android:layout_alignParentStart="true"
-                    android:layout_centerVertical="true"
-            />
-        </RelativeLayout>
+
         <FrameLayout
                 android:id="@+id/frameLayout"
                 android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="8"
-                android:layout_gravity="center"
-                android:layout_margin="10dp">
+                android:layout_height="match_parent"
+                android:layout_gravity="center">
 
             <FrameLayout
                     android:id="@+id/holderImageCrop"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_gravity="center"
-                    android:layout_margin="10dp">
+                    android:layout_gravity="center">
 
                 <ImageView
                         android:id="@+id/imageView"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:adjustViewBounds="true"/>
+                        android:adjustViewBounds="true" />
             </FrameLayout>
 
             <com.labters.documentscanner.libraries.PolygonView
@@ -93,41 +52,150 @@
                     android:layout_gravity="center"
                     android:visibility="gone"/>
         </FrameLayout>
-
-        <RelativeLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:layout_marginStart="20dp"
-                android:layout_marginEnd="20dp"
-                android:gravity="center">
-            <Button
-                    android:id="@+id/btnImageCrop"
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:minWidth="150dp"
-                    android:layout_alignParentEnd="true"
-                    android:foreground="?android:selectableItemBackground"
-                    android:shadowRadius="10"
-                    android:textColor="#ffffff"
-            />
-            <Button
-                    android:id="@+id/btnClose"
-                    android:layout_width="wrap_content"
-                    android:layout_height="50dp"
-                    android:minWidth="150dp"
-                    android:layout_alignParentStart="true"
-                    android:foreground="?android:selectableItemBackground"
-                    android:shadowRadius="10"
-                    android:textColor="#ffffff"
-            />
-        </RelativeLayout>
     </LinearLayout>
+
+    <View
+            android:id="@+id/top_shadow"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/fading_shadow" />
+
+    <RelativeLayout
+            android:id="@+id/top_parent_rl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/top_shadow"
+            android:layout_alignTop="@+id/top_shadow"
+            android:paddingLeft="5dp"
+            android:paddingRight="5dp">
+
+        <ImageView
+                android:id="@+id/btnClose"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:layout_centerVertical="true"
+                android:paddingTop="10dp"
+                android:paddingLeft="5dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:paddingRight="5dp"
+                android:src="@drawable/ic_exit" />
+
+        <ImageView
+                android:id="@+id/btnImageCrop"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:gravity="center"
+                android:layout_centerVertical="true"
+                android:layout_alignParentEnd="true"
+                android:paddingTop="10dp"
+                android:paddingLeft="5dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:paddingRight="5dp"
+                android:src="@drawable/ic_done" />
+
+    </RelativeLayout>
+
+    <View
+            android:id="@+id/bottom_shadow"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_alignParentBottom="true"
+            android:background="@drawable/below_shadow" />
+
+    <RelativeLayout
+            android:id="@+id/bottom_parent_rl"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/bottom_shadow"
+            android:layout_alignTop="@+id/bottom_shadow">
+
+
+<!--        <Button-->
+<!--                android:id="@+id/btnImageCrop"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="50dp"-->
+<!--                android:minWidth="150dp"-->
+<!--                android:layout_alignParentEnd="true"-->
+<!--                android:foreground="?android:selectableItemBackground"-->
+<!--                android:shadowRadius="10"-->
+<!--                android:background="@drawable/ic_done"-->
+<!--                android:textColor="#ffffff"-->
+<!--                />-->
+<!--        <Button-->
+<!--                android:id="@+id/btnClose"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="50dp"-->
+<!--                android:minWidth="150dp"-->
+<!--                android:layout_alignParentStart="true"-->
+<!--                android:foreground="?android:selectableItemBackground"-->
+<!--                android:shadowRadius="10"-->
+<!--                android:textColor="#ffffff"-->
+<!--                />-->
+
+
+
+        <ImageView
+                android:id="@+id/ivRotate"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:paddingTop="10dp"
+                android:paddingLeft="5dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:paddingRight="5dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginTop="8dp"
+                android:tint="#ffffff"
+                android:src="@drawable/ic_rotate"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                android:visibility="gone"
+                />
+        <ImageView
+                android:id="@+id/ivRebase"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:paddingTop="10dp"
+                android:paddingLeft="5dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:paddingRight="5dp"
+                android:src="@drawable/ic_revert"
+                android:tint="#ffffff"
+                android:layout_alignParentEnd="true"
+                android:layout_centerVertical="true"
+                />
+        <ImageView
+                android:id="@+id/ivInvert"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:paddingTop="10dp"
+                android:paddingLeft="5dp"
+                android:paddingBottom="10dp"
+                android:paddingStart="5dp"
+                android:paddingEnd="5dp"
+                android:paddingRight="5dp"
+                android:tint="#ffffff"
+                android:src="@drawable/ic_black_white"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                />
+
+    </RelativeLayout>
+
     <ProgressBar
             android:id="@+id/progressBar"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="@color/halfTransparentBackground"
-            android:padding="100dp"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_centerInParent="true"
+            android:background="#00ffffff"
     />
 </RelativeLayout>

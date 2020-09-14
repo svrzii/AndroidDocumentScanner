@@ -10,6 +10,7 @@
 package com.labters.documentscanner;
 
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorMatrix;
@@ -32,6 +33,10 @@ import com.labters.documentscanner.base.DocumentScanActivity;
 import com.labters.documentscanner.helpers.ScannerConstants;
 import com.labters.documentscanner.libraries.PolygonView;
 
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.text.SimpleDateFormat;
@@ -48,6 +53,8 @@ public class ImageCropActivity extends DocumentScanActivity {
     private ImageView imageView;
     private PolygonView polygonView;
     private boolean isInverted;
+    private boolean isBW;
+
     private ProgressBar progressBar;
     private Bitmap cropImage;
     private OnClickListener btnImageEnhanceClick = new OnClickListener() {
@@ -56,7 +63,7 @@ public class ImageCropActivity extends DocumentScanActivity {
             showProgressBar();
             disposable.add(
                     Observable.fromCallable(() -> {
-                        cropImage = getCroppedImage();
+                        cropImage = getCroppedImage(cropImage);
                         if (cropImage == null)
                             return false;
                         if (ScannerConstants.saveStorage)
@@ -88,7 +95,9 @@ public class ImageCropActivity extends DocumentScanActivity {
             showProgressBar();
             disposable.add(
                     Observable.fromCallable(() -> {
-                        invertColor();
+                        bwColor();
+//                                                    invertColor();
+
                         return false;
                     })
                             .subscribeOn(Schedulers.io())
@@ -108,7 +117,8 @@ public class ImageCropActivity extends DocumentScanActivity {
             disposable.add(
                     Observable.fromCallable(() -> {
                         if (isInverted)
-                            invertColor();
+                            bwColor();
+//                            invertColor();
                         cropImage = rotateBitmap(cropImage, 90);
                         return false;
                     })
@@ -128,6 +138,8 @@ public class ImageCropActivity extends DocumentScanActivity {
         setContentView(R.layout.activity_image_crop);
         cropImage = ScannerConstants.selectedImageBitmap;
         isInverted = false;
+        isBW = false;
+
         if (ScannerConstants.selectedImageBitmap != null)
             initView();
         else {
@@ -189,25 +201,24 @@ public class ImageCropActivity extends DocumentScanActivity {
     }
 
     private void initView() {
-        Button btnImageCrop = findViewById(R.id.btnImageCrop);
-        Button btnClose = findViewById(R.id.btnClose);
+        ImageView btnImageCrop = findViewById(R.id.btnImageCrop);
+        ImageView btnClose = findViewById(R.id.btnClose);
         holderImageCrop = findViewById(R.id.holderImageCrop);
         imageView = findViewById(R.id.imageView);
         ImageView ivRotate = findViewById(R.id.ivRotate);
         ImageView ivInvert = findViewById(R.id.ivInvert);
         ImageView ivRebase = findViewById(R.id.ivRebase);
-        btnImageCrop.setText(ScannerConstants.cropText);
-        btnClose.setText(ScannerConstants.backText);
+
         polygonView = findViewById(R.id.polygonView);
         progressBar = findViewById(R.id.progressBar);
         if (progressBar.getIndeterminateDrawable() != null && ScannerConstants.progressColor != null)
             progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor(ScannerConstants.progressColor), android.graphics.PorterDuff.Mode.MULTIPLY);
         else if (progressBar.getProgressDrawable() != null && ScannerConstants.progressColor != null)
             progressBar.getProgressDrawable().setColorFilter(Color.parseColor(ScannerConstants.progressColor), android.graphics.PorterDuff.Mode.MULTIPLY);
-        btnImageCrop.setBackgroundColor(Color.parseColor(ScannerConstants.cropColor));
-        btnClose.setBackgroundColor(Color.parseColor(ScannerConstants.backColor));
+
         btnImageCrop.setOnClickListener(btnImageEnhanceClick);
         btnClose.setOnClickListener(btnCloseClick);
+
         ivRotate.setOnClickListener(onRotateClick);
         ivInvert.setOnClickListener(btnInvertColor);
         ivRebase.setOnClickListener(btnRebase);
@@ -228,6 +239,30 @@ public class ImageCropActivity extends DocumentScanActivity {
             cropImage = cropImage.copy(cropImage.getConfig(), true);
         }
         isInverted = !isInverted;
+    }
+
+    private void bwColor() {
+        if (!isBW) {
+            Mat adaptiveTh = new Mat();
+            Utils.bitmapToMat(cropImage, adaptiveTh);
+
+            Imgproc.cvtColor(adaptiveTh, adaptiveTh, Imgproc.COLOR_BGR2GRAY);
+
+            Imgproc.adaptiveThreshold(adaptiveTh, adaptiveTh, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+                    Imgproc.THRESH_BINARY, 75, 10);
+
+            cropImage = Bitmap.createBitmap(adaptiveTh.cols(), adaptiveTh.rows(),
+                    Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(adaptiveTh, cropImage);
+
+            cropImage = cropImage.copy(cropImage.getConfig(), true);
+        } else {
+            cropImage = cropImage.copy(cropImage.getConfig(), true);
+        }
+
+        isBW = !isBW;
+
+
     }
 
     private String saveToInternalStorage(Bitmap bitmapImage) {
