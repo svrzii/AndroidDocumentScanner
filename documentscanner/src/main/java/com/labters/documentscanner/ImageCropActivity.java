@@ -52,8 +52,7 @@ public class ImageCropActivity extends DocumentScanActivity {
     private FrameLayout holderImageCrop;
     private ImageView imageView;
     private PolygonView polygonView;
-    private boolean isInverted;
-    private boolean isBW;
+//    private boolean isBW;
 
     private ProgressBar progressBar;
     private Bitmap cropImage;
@@ -85,40 +84,36 @@ public class ImageCropActivity extends DocumentScanActivity {
     };
     private OnClickListener btnRebase = v -> {
         cropImage = ScannerConstants.selectedImageBitmap.copy(ScannerConstants.selectedImageBitmap.getConfig(), true);
-        isInverted = false;
         startCropping();
     };
+
+    private OnClickListener btnColor = v -> {
+        cropImage = ScannerConstants.selectedImageBitmap.copy(ScannerConstants.selectedImageBitmap.getConfig(), true);
+        Bitmap scaledBitmap = scaledBitmap(cropImage, holderImageCrop.getWidth(), holderImageCrop.getHeight());
+        imageView.setImageBitmap(scaledBitmap);
+    };
+
     private OnClickListener btnCloseClick = v -> finish();
-    private OnClickListener btnInvertColor = new OnClickListener() {
+    private OnClickListener btnBWColor = new OnClickListener() {
         @Override
         public void onClick(View v) {
-            showProgressBar();
-            disposable.add(
-                    Observable.fromCallable(() -> {
-                        bwColor();
-//                                                    invertColor();
-
-                        return false;
-                    })
-                            .subscribeOn(Schedulers.io())
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe((result) -> {
-                                hideProgressBar();
-                                Bitmap scaledBitmap = scaledBitmap(cropImage, holderImageCrop.getWidth(), holderImageCrop.getHeight());
-                                imageView.setImageBitmap(scaledBitmap);
-                            })
-            );
+            setBW();
         }
     };
+
+    private OnClickListener btnGrayColor = new OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            setGray();
+        }
+    };
+
     private OnClickListener onRotateClick = new OnClickListener() {
         @Override
         public void onClick(View v) {
             showProgressBar();
             disposable.add(
                     Observable.fromCallable(() -> {
-                        if (isInverted)
-                            bwColor();
-//                            invertColor();
                         cropImage = rotateBitmap(cropImage, 90);
                         return false;
                     })
@@ -132,13 +127,48 @@ public class ImageCropActivity extends DocumentScanActivity {
         }
     };
 
+
+    protected void setBW() {
+        showProgressBar();
+        disposable.add(
+                Observable.fromCallable(() -> {
+                    bwColor();
+                    return false;
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((result) -> {
+                    hideProgressBar();
+                    Bitmap scaledBitmap = scaledBitmap(cropImage, holderImageCrop.getWidth(), holderImageCrop.getHeight());
+                    imageView.setImageBitmap(scaledBitmap);
+                })
+        );
+    }
+
+    protected void setGray() {
+
+        showProgressBar();
+        disposable.add(
+                Observable.fromCallable(() -> {
+                    grayColor();
+                    return false;
+                })
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe((result) -> {
+                            hideProgressBar();
+                            Bitmap scaledBitmap = scaledBitmap(cropImage, holderImageCrop.getWidth(), holderImageCrop.getHeight());
+                            imageView.setImageBitmap(scaledBitmap);
+                        })
+        );
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_image_crop);
         cropImage = ScannerConstants.selectedImageBitmap;
-        isInverted = false;
-        isBW = false;
+//        isBW = false;
 
         if (ScannerConstants.selectedImageBitmap != null)
             initView();
@@ -206,7 +236,10 @@ public class ImageCropActivity extends DocumentScanActivity {
         holderImageCrop = findViewById(R.id.holderImageCrop);
         imageView = findViewById(R.id.imageView);
         ImageView ivRotate = findViewById(R.id.ivRotate);
-        ImageView ivInvert = findViewById(R.id.ivInvert);
+        ImageView ivBW = findViewById(R.id.ivInvert);
+        ImageView ivColor = findViewById(R.id.ivColor);
+        ImageView ivGray = findViewById(R.id.ivGray);
+
         ImageView ivRebase = findViewById(R.id.ivRebase);
 
         polygonView = findViewById(R.id.polygonView);
@@ -220,29 +253,16 @@ public class ImageCropActivity extends DocumentScanActivity {
         btnClose.setOnClickListener(btnCloseClick);
 
         ivRotate.setOnClickListener(onRotateClick);
-        ivInvert.setOnClickListener(btnInvertColor);
+        ivBW.setOnClickListener(btnBWColor);
+        ivColor.setOnClickListener(btnColor);
         ivRebase.setOnClickListener(btnRebase);
+        ivGray.setOnClickListener(btnGrayColor);
         startCropping();
     }
 
-    private void invertColor() {
-        if (!isInverted) {
-            Bitmap bmpMonochrome = Bitmap.createBitmap(cropImage.getWidth(), cropImage.getHeight(), Bitmap.Config.ARGB_8888);
-            Canvas canvas = new Canvas(bmpMonochrome);
-            ColorMatrix ma = new ColorMatrix();
-            ma.setSaturation(0);
-            Paint paint = new Paint();
-            paint.setColorFilter(new ColorMatrixColorFilter(ma));
-            canvas.drawBitmap(cropImage, 0, 0, paint);
-            cropImage = bmpMonochrome.copy(bmpMonochrome.getConfig(), true);
-        } else {
-            cropImage = cropImage.copy(cropImage.getConfig(), true);
-        }
-        isInverted = !isInverted;
-    }
-
     private void bwColor() {
-        if (!isBW) {
+//        if (!isBW) {
+        try {
             Mat adaptiveTh = new Mat();
             Utils.bitmapToMat(cropImage, adaptiveTh);
 
@@ -256,13 +276,38 @@ public class ImageCropActivity extends DocumentScanActivity {
             Utils.matToBitmap(adaptiveTh, cropImage);
 
             cropImage = cropImage.copy(cropImage.getConfig(), true);
-        } else {
-            cropImage = cropImage.copy(cropImage.getConfig(), true);
+        } catch (Exception e) {
+
         }
 
-        isBW = !isBW;
+//            isBW = !isBW;
+//        }
+    }
 
+    private void grayColor() {
+//        if (!isBW) {
+        try {
+            cropImage = ScannerConstants.selectedImageBitmap.copy(ScannerConstants.selectedImageBitmap.getConfig(), true);
 
+            Mat adaptiveTh = new Mat();
+            Utils.bitmapToMat(cropImage, adaptiveTh);
+
+            Imgproc.cvtColor(adaptiveTh, adaptiveTh, Imgproc.COLOR_BGR2GRAY);
+
+//            Imgproc.adaptiveThreshold(adaptiveTh, adaptiveTh, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+//                    Imgproc.THRESH_BINARY, 75, 10);
+
+            cropImage = Bitmap.createBitmap(adaptiveTh.cols(), adaptiveTh.rows(),
+                    Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(adaptiveTh, cropImage);
+
+            cropImage = cropImage.copy(cropImage.getConfig(), true);
+        } catch (Exception e) {
+
+        }
+
+//            isBW = !isBW;
+//        }
     }
 
     private String saveToInternalStorage(Bitmap bitmapImage) {

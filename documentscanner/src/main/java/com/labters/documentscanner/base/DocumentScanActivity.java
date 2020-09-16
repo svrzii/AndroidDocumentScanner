@@ -25,8 +25,11 @@ import com.labters.documentscanner.R;
 import com.labters.documentscanner.libraries.NativeClass;
 import com.labters.documentscanner.libraries.PolygonView;
 
+import org.opencv.android.Utils;
+import org.opencv.core.Mat;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,15 +96,33 @@ public abstract class DocumentScanActivity extends AppCompatActivity {
                     setImageRotation();
                     return false;
                 })
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe((result) -> {
-                            initializeCropping();
-                            setProgressBar(false);
-                        })
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe((result) -> {
+                    initializeCropping();
+                    setProgressBar(false);
+                })
         );
     }
 
+
+    private void bwColor() {
+        try {
+            Mat adaptiveTh = new Mat();
+            Utils.bitmapToMat(selectedImage, adaptiveTh);
+
+            Imgproc.cvtColor(adaptiveTh, adaptiveTh, Imgproc.COLOR_BGR2GRAY);
+
+            Imgproc.adaptiveThreshold(adaptiveTh, adaptiveTh, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
+                    Imgproc.THRESH_BINARY, 75, 10);
+
+            selectedImage = Bitmap.createBitmap(adaptiveTh.cols(), adaptiveTh.rows(),
+                    Bitmap.Config.ARGB_8888);
+            Utils.matToBitmap(adaptiveTh, selectedImage);
+
+            selectedImage = selectedImage.copy(selectedImage.getConfig(), true);
+        } catch (Exception e) { }
+    }
 
     public void initializeCropping() {
         Bitmap scaledBitmap = scaledBitmap(selectedImage, getHolderImageCrop().getWidth(), getHolderImageCrop().getHeight());
