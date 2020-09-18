@@ -9,6 +9,8 @@
 
 package com.labters.documentscanner;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -209,9 +211,10 @@ public class ImageCropActivity extends DocumentScanActivity {
 
     @Override
     protected void showError(CropperErrorType errorType) {
+        final Context context = this;
         switch (errorType) {
             case CROP_ERROR:
-                Toast.makeText(this, ScannerConstants.cropError, Toast.LENGTH_LONG).show();
+                runOnUiThread(() -> Toast.makeText(context, ScannerConstants.cropError, Toast.LENGTH_LONG).show());
                 break;
         }
     }
