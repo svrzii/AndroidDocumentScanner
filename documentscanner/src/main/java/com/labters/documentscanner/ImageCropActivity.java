@@ -244,10 +244,13 @@ public class ImageCropActivity extends DocumentScanActivity {
 
         polygonView = findViewById(R.id.polygonView);
         progressBar = findViewById(R.id.progressBar);
-        if (progressBar.getIndeterminateDrawable() != null && ScannerConstants.progressColor != null)
-            progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor(ScannerConstants.progressColor), android.graphics.PorterDuff.Mode.MULTIPLY);
-        else if (progressBar.getProgressDrawable() != null && ScannerConstants.progressColor != null)
-            progressBar.getProgressDrawable().setColorFilter(Color.parseColor(ScannerConstants.progressColor), android.graphics.PorterDuff.Mode.MULTIPLY);
+
+        if (!ScannerConstants.showEditButtons) {
+            RelativeLayout bottomLayout = findViewById(R.id.bottom_parent_rl);
+            bottomLayout.setVisibility(View.GONE);
+        }
+
+        progressBar.getIndeterminateDrawable().setColorFilter(Color.parseColor(ScannerConstants.progressColor), android.graphics.PorterDuff.Mode.MULTIPLY);
 
         btnImageCrop.setOnClickListener(btnImageEnhanceClick);
         btnClose.setOnClickListener(btnCloseClick);
@@ -293,9 +296,6 @@ public class ImageCropActivity extends DocumentScanActivity {
             Utils.bitmapToMat(cropImage, adaptiveTh);
 
             Imgproc.cvtColor(adaptiveTh, adaptiveTh, Imgproc.COLOR_BGR2GRAY);
-
-//            Imgproc.adaptiveThreshold(adaptiveTh, adaptiveTh, 255, Imgproc.ADAPTIVE_THRESH_GAUSSIAN_C,
-//                    Imgproc.THRESH_BINARY, 75, 10);
 
             cropImage = Bitmap.createBitmap(adaptiveTh.cols(), adaptiveTh.rows(),
                     Bitmap.Config.ARGB_8888);

@@ -113,7 +113,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignBottom="@+id/bottom_shadow"
-            android:layout_alignTop="@+id/bottom_shadow">
+            android:layout_alignTop="@+id/bottom_shadow"
+            >
 
 
 <!--        <Button-->
