@@ -13,7 +13,6 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.graphics.drawable.BitmapDrawable;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -65,14 +64,20 @@ public abstract class DocumentScanActivity extends AppCompatActivity {
 
     private void setImageRotation() {
         Bitmap tempBitmap = selectedImage.copy(selectedImage.getConfig(), true);
-        for (int i = 1; i <= 4; i++) {
-            MatOfPoint2f point2f = nativeClass.getPoint(tempBitmap);
-            if (point2f == null) {
-                tempBitmap = rotateBitmap(tempBitmap, 90 * i);
-            } else {
-                selectedImage = tempBitmap.copy(selectedImage.getConfig(), true);
-                break;
+        try {
+            for (int i = 1; i <= 4; i++) {
+                MatOfPoint2f point2f = nativeClass.getPoint(tempBitmap);
+                if (point2f == null) {
+                    tempBitmap = rotateBitmap(tempBitmap, 90 * i);
+                } else {
+                    selectedImage = tempBitmap.copy(selectedImage.getConfig(), true);
+                    tempBitmap.recycle();
+                    break;
+                }
             }
+        } catch (Exception e) {
+            selectedImage = tempBitmap.copy(selectedImage.getConfig(), true);
+            tempBitmap.recycle();
         }
     }
 
@@ -128,21 +133,19 @@ public abstract class DocumentScanActivity extends AppCompatActivity {
         Bitmap scaledBitmap = scaledBitmap(selectedImage, getHolderImageCrop().getWidth(), getHolderImageCrop().getHeight());
         getImageView().setImageBitmap(scaledBitmap);
 
-        Bitmap tempBitmap = ((BitmapDrawable) getImageView().getDrawable()).getBitmap();
         Map<Integer, PointF> pointFs = null;
         try {
-            pointFs = getEdgePoints(tempBitmap);
+            pointFs = getEdgePoints(scaledBitmap);
             getPolygonView().setPoints(pointFs);
             getPolygonView().setVisibility(View.VISIBLE);
 
             int padding = (int) getResources().getDimension(R.dimen.scanPadding);
 
-            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(tempBitmap.getWidth() + 2 * padding, tempBitmap.getHeight() + 2 * padding);
+            FrameLayout.LayoutParams layoutParams = new FrameLayout.LayoutParams(scaledBitmap.getWidth() + 2 * padding, scaledBitmap.getHeight() + 2 * padding);
             layoutParams.gravity = Gravity.CENTER;
 
             getPolygonView().setLayoutParams(layoutParams);
             getPolygonView().setPointColor(getResources().getColor(R.color.blue));
-
         } catch (Exception e) {
             e.printStackTrace();
         }
